@@ -1,17 +1,20 @@
 from flask_oauthlib.client import OAuth
-
 from webapp import app
-
 from flask import session, redirect, request, render_template
-import httplib, json, sqlite3
+import http, json, pymysql, os
 
-from config import api, site, db, consumer_key, consumer_secret
-
-
+site = os.environ['SITE']
+api = os.environ['API']
+db_creds = {
+    'password': os.environ['MYSQL_ROOT_PASSWORD'],
+    'db': os.environ['MYSQL_DATABASE'],
+    'host': os.environ['MYSQL_HOSTNAME'],
+    'user': os.environ['MYSQL_USER']
+}
 oauth = OAuth()
 faforever = oauth.remote_app('faforever',
-    consumer_key=consumer_key,
-    consumer_secret=consumer_secret,
+    consumer_key=os.environ['CONSUMER_KEY'],
+    consumer_secret=os.environ['CONSUMER_SECRET'],
     base_url=api+"/oauth/authorize",
     access_token_url=api+"/oauth/token",
     request_token_params={"scope":"public_profile"}
@@ -43,7 +46,7 @@ def vote():
         if not token:
             return redirect("/fail")
         try:
-            conn = httplib.HTTPSConnection(api)
+            conn = http.client.HTTPSConnection(api)
             headers = {"Authorization":"Bearer " + token}
             conn.request("GET","/players/me",headers=headers)
             response = conn.getresponse()
@@ -57,14 +60,14 @@ def vote():
         if not candidate:
             return redirect("/fail")
 
-        conn = sqlite3.connect(db)
-        c = conn.cursor()
-        c.execute("DELETE FROM votes WHERE vid=?",(vid,))
-        c.execute("INSERT INTO votes VALUES(?,?)",(vid,candidate))
+        conn = pymysql.connect(**db_creds)
+        with conn as cursor:
+            cursor.execute("DELETE FROM votes WHERE vid=?",(vid,))
+            cursor.execute("INSERT INTO votes VALUES(?,?)",(vid,candidate))
         conn.commit()
-        
+
         return "Thanks for voting!"
-    
+
     token = session.get("token")
     if not token:
         return redirect("/fail")
@@ -75,4 +78,3 @@ def vote():
 @app.route('/fail')
 def fail():
     return "Something went wrong... :("
-

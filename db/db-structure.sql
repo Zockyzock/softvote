@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS votes;
+
+CREATE TABLE votes (
+  vid INTEGER NOT NULL UNIQUE,
+  candidate VARCHAR(128) NOT NULL,
+  PRIMARY KEY (vid)
+);

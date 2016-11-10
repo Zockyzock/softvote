@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+  db:
+    build: db
+    env_file:
+      - .env
+    networks:
+      - database
+
+  softvote:
+    build: ./
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - database
+    ports:
+      - "5000:5000"
+
+networks:
+  database:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
