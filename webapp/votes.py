@@ -5,20 +5,15 @@ from webapp import app
 from flask import session, redirect, request, render_template
 import httplib, json, sqlite3
 
-#db path
-db = "votedb"
-
-#Change these
-api = "api.test.faforever.com"
-site = "https://softvote.cloudapp.net"
+from config import api, site, db, consumer_key, consumer_secret
 
 
 oauth = OAuth()
 faforever = oauth.remote_app('faforever',
-    consumer_key="951ec7bf-8b73-45ce-a3d7-fcf4e4290a69",
-    consumer_secret="0388def9-01dc-4887-a6fb-6d0a09c5abb0",
-    base_url="https://api.test.faforever.com/oauth/authorize",
-    access_token_url="https://api.test.faforever.com/oauth/token",
+    consumer_key=consumer_key,
+    consumer_secret=consumer_secret,
+    base_url=api+"/oauth/authorize",
+    access_token_url=api+"/oauth/token",
     request_token_params={"scope":"public_profile"}
 )
 
