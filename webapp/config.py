@@ -1,0 +1,5 @@
+db = "votedb"
+api = "api.test.faforever.com"
+site = "https://softvote.cloudapp.net"
+consumer_key="951ec7bf-8b73-45ce-a3d7-fcf4e4290a69"
+consumer_secret="0388def9-01dc-4887-a6fb-6d0a09c5abb0"
