@@ -1,7 +1,11 @@
 from flask_oauthlib.client import OAuth
 from webapp import app
 from flask import session, redirect, request, render_template
-import http, json, pymysql, os
+import json, pymysql, os, ssl, httplib
+
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
 site = os.environ['SITE']
 api = os.environ['API']
@@ -46,14 +50,14 @@ def vote():
         if not token:
             return redirect("/fail")
         try:
-            conn = http.client.HTTPSConnection(api)
+            #strip off https:// from api domain
+            conn = httplib.HTTPSConnection(api[8:])
             headers = {"Authorization":"Bearer " + token}
             conn.request("GET","/players/me",headers=headers)
             response = conn.getresponse()
             data = response.read()
             vid = json.loads(data)["data"]["id"]
         except Exception as e:
-            print(e)
             return redirect("/fail")
 
         candidate = request.form.get("candidate")
@@ -62,8 +66,8 @@ def vote():
 
         conn = pymysql.connect(**db_creds)
         with conn as cursor:
-            cursor.execute("DELETE FROM votes WHERE vid=?",(vid,))
-            cursor.execute("INSERT INTO votes VALUES(?,?)",(vid,candidate))
+            cursor.execute("DELETE FROM votes WHERE vid=%s",(vid,))
+            cursor.execute("INSERT INTO votes VALUES(%s,%s)",(vid,candidate))
         conn.commit()
 
         return "Thanks for voting!"
