@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>FAF voting app</title>
+        <link rel="stylesheet" href="/static/css/bootflat.min.css">
+        <style type="text/css">
+            .vote-div {
+                width: 300px;
+                background-color: #eee;
+                color: #000;
+                text-align: center;
+                padding: 10px;
+                padding-bottom: 20px;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                margin-top: 50px;
+                border-radius: 4px;
+            }
+            .btn-success-vote {
+                width: 100px;
+                text-align: center;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="vote-div">
+            <h3>Player Councillor Vote</h3>
+            <form method="post" id="vote-form">
+            <select name="candidate">
+                <option>Select a candidate</option>
+                <option value="bias">bias</option>
+                <option value="Evildrew">Evildrew</option>
+                <option value="Giebmasse">Giebmasse</option>
+                <option value="Tokyto">Tokyto</option>
+            </select><br><br>
+            </form>
+            <button type="submit" class="btn btn-success btn-success-vote" form="vote-form">Vote!</button>
+        </div>
+    </body>
+</html>
