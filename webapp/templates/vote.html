@@ -29,9 +29,11 @@
       <form method="post" id="vote-form">
         {% for vote in vos %}
           <h3>{{vote}}</h3>
-          {% for vo in vos[vote][1] %}
-            <input type="radio" name="{{vos[vote][0]}}" value="{{vos[vote][1][vo]}}"> {{vos[vote][1][vo]}}<br>
-          {% endfor %}
+          <div style="text-align: left">
+            {% for vo in vos[vote][1] %}
+              <input type="radio" name="{{vos[vote][0]}}" value="{{vos[vote][1][vo]}}"> {{vos[vote][1][vo]}}<br>
+            {% endfor %}
+          </div>
           <br>
         {% endfor %}
         <br>

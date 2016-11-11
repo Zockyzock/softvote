@@ -60,10 +60,13 @@ def vote():
         token = session.get("token")
         if not token:
             return redirect("/fail")
-        req = urllib.request.Request(api + "/players/me", method="GET",
-            headers={"Authorization":"Bearer " + token})
-        with urllib.request.urlopen(req) as response:
-            vid = json.loads(response.read().decode('utf8'))["data"]["id"]
+        try:
+            req = urllib.request.Request(api + "/players/me", method="GET",
+                headers={"Authorization":"Bearer " + token})
+            with urllib.request.urlopen(req) as response:
+                vid = json.loads(response.read().decode('utf8'))["data"]["id"]
+        except:
+            redirect("/fail")
 
         for vote in voting_options:
             vote_id = voting_options[vote][0]
@@ -89,4 +92,4 @@ def vote():
 
 @app.route('/fail')
 def fail():
-    return "Something went wrong... :("
+    return "Something went wrong, please try again </a href=\"%s\">here</a>." % site
