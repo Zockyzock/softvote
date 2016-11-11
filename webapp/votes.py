@@ -22,6 +22,19 @@ faforever = oauth.remote_app('faforever',
     request_token_params={"scope":"public_profile"}
 )
 
+# Voting Options
+voting_options={
+    "Player Councillor Vote": (
+        "pc_vote_id",
+        {"1":"biass","2":"Evildrew","3":"Giebmasse","4":"Tokyto"}
+    ),
+    "Balance Team Vote":(
+        "bt_vote_id",
+        {"A":"Appointed by the balance councillor","B":"Elected by the community"}
+    )
+}
+
+
 @app.route("/")
 def root():
     return render_template("home.html")
@@ -52,23 +65,26 @@ def vote():
         with urllib.request.urlopen(req) as response:
             vid = json.loads(response.read().decode('utf8'))["data"]["id"]
 
-        candidate = request.form.get("candidate")
-        if not candidate:
-            return redirect("/fail")
+        for vote in voting_options:
+            vote_id = voting_options[vote][0]
+            choice = request.form.get(vote_id)
+            if not choice:
+                continue
 
-        conn = pymysql.connect(**db_creds)
-        with conn.cursor() as cursor:
-            cursor.execute("DELETE FROM votes WHERE vid=%s",(vid))
-            cursor.execute("INSERT INTO votes VALUES(%s,%s)",(vid,candidate))
-        conn.commit()
-        conn.close()
+            conn = pymysql.connect(**db_creds)
+            with conn.cursor() as cursor:
+                cursor.execute("DELETE FROM votes WHERE voter_id=%s AND vote_id=%s",(vid,vote_id))
+                cursor.execute("INSERT INTO votes VALUES(%s,%s,%s)",(vid,choice,vote_id))
+            conn.commit()
+            conn.close()
         return "Thanks for voting!"
 
-    token = session.get("token")
-    if not token:
-        return redirect("/fail")
-
-    return render_template("vote.html")
+    else:
+        token = session.get("token")
+        if not token:
+            return redirect("/fail")
+    
+        return render_template("vote.html",vos=voting_options)
 
 
 @app.route('/fail')
