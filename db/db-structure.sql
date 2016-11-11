@@ -1,8 +1,7 @@
 DROP TABLE IF EXISTS votes;
 
 CREATE TABLE votes (
-  voter_id INTEGER NOT NULL UNIQUE,
+  voter_id INTEGER NOT NULL,
   vote VARCHAR(128) NOT NULL,
-  vote_id VARCHAR(128) NOT NULL,
-  PRIMARY KEY (voter_id, vote_id)
+  vote_id VARCHAR(128) NOT NULL
 );

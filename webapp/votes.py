@@ -71,7 +71,7 @@ def vote():
         for vote in voting_options:
             vote_id = voting_options[vote][0]
             choice = request.form.get(vote_id)
-            if not choice:
+            if not choice or not choice in voting_options[vote][1]:
                 continue
 
             conn = pymysql.connect(**db_creds)
@@ -80,7 +80,7 @@ def vote():
                 cursor.execute("INSERT INTO votes VALUES(%s,%s,%s)",(vid,choice,vote_id))
             conn.commit()
             conn.close()
-        return "Thanks for voting!"
+        return render_template("success.html",site=site)
 
     else:
         token = session.get("token")
@@ -92,4 +92,4 @@ def vote():
 
 @app.route('/fail')
 def fail():
-    return "Something went wrong, please try again </a href=\"%s\">here</a>." % site
+    return render_template("fail.html",site=site)
