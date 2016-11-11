@@ -1,7 +1,9 @@
 from flask_oauthlib.client import OAuth
 from webapp import app
 from flask import session, redirect, request, render_template
-import http, json, pymysql, os
+import json, pymysql, os, ssl, urllib
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 site = os.environ['SITE']
 api = os.environ['API']
@@ -30,8 +32,8 @@ def login():
 
 
 @app.route('/oauth',methods=["GET","POST"])
-@faforever.authorized_handler
-def test3(resp):
+def test3():
+    resp = faforever.authorized_response()
     if resp is None:
         return redirect("/fail")
     token = resp["access_token"]
@@ -45,27 +47,21 @@ def vote():
         token = session.get("token")
         if not token:
             return redirect("/fail")
-        try:
-            conn = http.client.HTTPSConnection(api)
-            headers = {"Authorization":"Bearer " + token}
-            conn.request("GET","/players/me",headers=headers)
-            response = conn.getresponse()
-            data = response.read()
-            vid = json.loads(data)["data"]["id"]
-        except Exception as e:
-            print(e)
-            return redirect("/fail")
+        req = urllib.request.Request(api + "/players/me", method="GET",
+            headers={"Authorization":"Bearer " + token})
+        with urllib.request.urlopen(req) as response:
+            vid = json.loads(response.read().decode('utf8'))["data"]["id"]
 
         candidate = request.form.get("candidate")
         if not candidate:
             return redirect("/fail")
 
         conn = pymysql.connect(**db_creds)
-        with conn as cursor:
-            cursor.execute("DELETE FROM votes WHERE vid=?",(vid,))
-            cursor.execute("INSERT INTO votes VALUES(?,?)",(vid,candidate))
+        with conn.cursor() as cursor:
+            cursor.execute("DELETE FROM votes WHERE vid=%s",(vid))
+            cursor.execute("INSERT INTO votes VALUES(%s,%s)",(vid,candidate))
         conn.commit()
-
+        conn.close()
         return "Thanks for voting!"
 
     token = session.get("token")
